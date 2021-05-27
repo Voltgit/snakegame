@@ -98,13 +98,14 @@ let snake = {
 		this.body[0] = [this.x, this.y];
 	},
 	
-	growUp() {
-		this.size = 15;
-		this.body.length = 15;
+	growUp(newSize = 15) {
+		this.size = newSize;
+		this.body.length = newSize;
 		
 		for(let i = 0; i < this.body.length; i++){
 			if(!this.body[i])	this.body[i] = [0,0];
 		}
+		changeScore();
 	}
 };
 
@@ -202,14 +203,19 @@ function checkColl(){
 	if(snake.x == apple.x && snake.y == apple.y) {
 		apple.move();
 		snake.size++;
-		document.getElementById("score").innerText = "Score: " + snake.size;
+		changeScore();
 	}
 	snake.body.forEach(function(item, index, array) {
 		if(index > 1 && array[0][0] === item[0] && array[0][1] === item[1]) {
 			snake.size = index;
 			snake.body.length = index;
+			changeScore();
 		}
 	});
+}
+
+function changeScore(){
+	document.getElementById("score").innerText = "Score: " + snake.size;
 }
 
 
