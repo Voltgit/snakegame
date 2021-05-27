@@ -86,16 +86,25 @@ let snake = {
 			case 3: this.y += 1; break;
 		}
 		
-		if(this.x < 0) this.x = gameWidth;
-		if(this.y < 0) this.y = gameHeight;
-		if(this.x > gameWidth) this.x = 0;
-		if(this.y > gameHeight) this.y = 0;
+		if(this.x < 0) this.x = gameWidth - 1;
+		if(this.y < 0) this.y = gameHeight - 1;
+		if(this.x > gameWidth - 1) this.x = 0;
+		if(this.y > gameHeight - 1) this.y = 0;
 		
 		for(let i = this.size - 1; i > 0; i--){
 			this.body[i] = this.body[i - 1];
 		}
 		
 		this.body[0] = [this.x, this.y];
+	},
+	
+	growUp() {
+		this.size = 15;
+		this.body.length = 15;
+		
+		for(let i = 0; i < this.body.length; i++){
+			if(!this.body[i])	this.body[i] = [0,0];
+		}
 	}
 };
 
@@ -108,7 +117,6 @@ let apple = {
 	move() {
 		this.x = rand(0, gameWidth);
 		this.y = rand(0, gameHeight);
-		console.log(this.x + "  \  " + this.y);
 	}
 };
 
@@ -118,6 +126,7 @@ new function(){
 	document.addEventListener("keyup", keyUp, false);
 	
 	snake.create();
+	apple.move();
 
 	setInterval(drawGame, drawDelay);
 	setInterval(tick, tickDelay);
@@ -128,15 +137,17 @@ new function(){
 
 
 function keyDown(e){
-	if(e.key === "a"){
+	if(e.keyCode === 65){
 		snake.setDir(0);
-	}else if(e.key === "w"){
+	}else if(e.keyCode === 87){
 		snake.setDir(1);
-	}else if(e.key === "d"){
+	}else if(e.keyCode === 68){
 		snake.setDir(2);
 	}
-	else if(e.key === "s"){
+	else if(e.keyCode === 83){
 		snake.setDir(3);
+	}else if(e.keyCode === 32){
+		console.log(snake.x + "  \  " + snake.y);
 	}
 }
 
@@ -188,7 +199,17 @@ function drawApple(){
 }
 
 function checkColl(){
-	if(snake.x == apple.x && snake.y == apple.y) apple.move();
+	if(snake.x == apple.x && snake.y == apple.y) {
+		apple.move();
+		snake.size++;
+		document.getElementById("score").innerText = "Score: " + snake.size;
+	}
+	snake.body.forEach(function(item, index, array) {
+		if(index > 1 && array[0][0] === item[0] && array[0][1] === item[1]) {
+			snake.size = index;
+			snake.body.length = index;
+		}
+	});
 }
 
 
