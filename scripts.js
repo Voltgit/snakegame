@@ -5,7 +5,7 @@ const gameWidth = WIDTH / BLOCKSIZE;
 const gameHeight = HEIGHT / BLOCKSIZE;
 
 const FPS = 60;
-const TICKRATE = 12;
+const TICKRATE = 10;
 const drawDelay = 1000 / FPS;
 const tickDelay = 1000 / TICKRATE;
 
@@ -14,6 +14,8 @@ let rand = (min, max) => (Math.trunc(Math.random() * (max-min)) + min);
 let Game = function() {
 	let canvas = document.getElementById("snakeGame");
 	this.g = canvas.getContext("2d");
+	
+	this.speed = 1;
 	
 	this.drawRect = function(x, y, width, height, fillColor = "red", strokeColor = "green", lineWidth = 1){
 		this.g.beginPath();
@@ -58,6 +60,8 @@ let snake = {
 	
 	bodyColor: "red",
 	headColor: "orange",
+	
+	autoPlay:  false,
 	
 	body: [],
 	
@@ -106,6 +110,23 @@ let snake = {
 			if(!this.body[i])	this.body[i] = [0,0];
 		}
 		changeScore();
+	},
+	
+	auto(appleX, appleY) {
+		
+		if(!this.autoPlay) return;
+		
+		if(this.x > appleX){
+			this.dir = 0;
+		}else if(this.x < appleX){
+			this.dir = 2;
+		}else{
+			if(this.y > appleY){
+				this.dir = 1;
+			}else{
+				this.dir = 3;
+			}
+		}
 	}
 };
 
@@ -121,6 +142,10 @@ let apple = {
 	}
 };
 
+let input = {};
+
+let tickFunc;
+
 new function(){
 	
 	document.addEventListener("keydown", keyDown, false);
@@ -128,16 +153,27 @@ new function(){
 	
 	snake.create();
 	apple.move();
-
+	
+	input.autoPlay = document.getElementById("autoPlay");
+	input.speedUp = document.getElementById("speedUp");
+	input.speedDown = document.getElementById("speedDown");
+	input.speedValue = document.getElementById("speedValue");
+	
 	setInterval(drawGame, drawDelay);
-	setInterval(tick, tickDelay);
+	tickFunc = setInterval(tick, tickDelay / game.speed);
+	
+}
+
+function changeSpeed() {
+	
+	clearInterval(tickFunc);
+	tickFunc = setInterval(tick, tickDelay / game.speed);
 	
 }
 
 
-
-
 function keyDown(e){
+	
 	if(e.keyCode === 65){
 		snake.setDir(0);
 	}else if(e.keyCode === 87){
@@ -165,7 +201,11 @@ function keyUp(e){
 
 function tick(){
 	
+	applyInput();
+	
+	snake.auto(apple.x, apple.y);
 	snake.move();
+	
 	checkColl();
 	//apple.move();
 }
@@ -212,6 +252,21 @@ function checkColl(){
 			changeScore();
 		}
 	});
+}
+
+function applyInput(){
+	snake.autoPlay = input.autoPlay.checked;
+	input.speedValue.innerHTML = game.speed;
+}
+
+function speedUp(){
+	game.speed += game.speed >= 9 ? 0 : 1;
+	changeSpeed();
+}
+
+function speedDown(){
+	game.speed -= game.speed <= 1 ? 0 : 1;
+	changeSpeed();
 }
 
 function changeScore(){
